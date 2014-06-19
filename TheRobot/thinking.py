@@ -5,7 +5,7 @@ while (numRecords == 0):
   print 'check num records'
 
 while (following):
-  #destination = first record in database
+  #destination = first record in databasedslkj
   gpsMinId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT min(gpsID) FROM gps ";').read()
   destinationLong = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT longitude FROM gps WHERE gpsID=\'' + str(gpsMinId) + '\'";').read()
   destinationLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMinId) + '\'";').read()
