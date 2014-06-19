@@ -21,22 +21,22 @@ while (following):
   #currently facing the right direction to go forwards toward destination 
   while (distanceToPlayer > 3 and (not destinationReached) and following):
     if (not moving):
-	  python /home/pi/motor.py f 1 &
+	  os.system('python /home/pi/motor.py f 1 &')
     
 	#get the players position
-	gpsMaxId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT max(gpsID) FROM gps ";').read()
+    gpsMaxId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT max(gpsID) FROM gps ";').read()
     playerLong = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT longitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
     playerLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
     
 	#get the carts position
-	cartLat = '43.816142300'
-	cartLong = '-111.784585100'
+    cartLat = '43.816142300'
+    cartLong = '-111.784585100'
 	
 	#calculate distance to player
-	distanceToPlayer = distance(cartLat, cartLong, playerLat, playerLong)
+    distanceToPlayer = distance(cartLat, cartLong, playerLat, playerLong)
 	
 	#calculate distance to destination
-	distanceToDestination = distance(destinationLat, destinationLong, cartLat, cartLong)
+    distanceToDestination = distance(destinationLat, destinationLong, cartLat, cartLong)
 	
 	#if within 1 meter of destination
     if (distanceToDestination < 1):
@@ -45,7 +45,7 @@ while (following):
 	#update following status
     following = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT pinStatus FROM pinstatus WHERE pinNumber=''5''";').read()  
   
-  python /home/pi/motor.py f 0 &
+  os.system('python /home/pi/motor.py f 0 &')
   
   if ((not destinationReached) and following): #within distance to the player
     while ((distanceToPlayer <= 3) and following):
