@@ -3,7 +3,8 @@ numRecords = 0
 while (numRecords == 0):
   #count num records in database
   print 'check num records'
-
+  numRecords = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT COUNT(*) from gps";').read()  
+  
 while (following):
   #destination = first record in databasedslkj
   gpsMinId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT min(gpsID) FROM gps ";').read()
@@ -21,7 +22,8 @@ while (following):
   #currently facing the right direction to go forwards toward destination 
   while (distanceToPlayer > 3 and (not destinationReached) and following):
     if (not moving):
-	  os.system('python /home/pi/motor.py f 1 &')
+      os.system('python /home/pi/motor.py f 1 &')
+      moving = true
     
 	#get the players position
     gpsMaxId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT max(gpsID) FROM gps ";').read()
@@ -46,17 +48,25 @@ while (following):
     following = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT pinStatus FROM pinstatus WHERE pinNumber=''5''";').read()  
   
   os.system('python /home/pi/motor.py f 0 &')
+  moving = false
   
   if ((not destinationReached) and following): #within distance to the player
     while ((distanceToPlayer <= 3) and following):
+      #get the players position
+      gpsMaxId = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT max(gpsID) FROM gps ";').read()
+      playerLong = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT longitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
+      playerLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
       distanceToPlayer = distance(playerLat, playerLong, cartLat, cartLong);
+      
+      #update following
       following = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "SELECT pinStatus FROM pinstatus WHERE pinNumber=''5''";').read()  
-  
-#delete all records in database except last one
-		
+    #delete all records in database except last one
+    os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "DELETE FROM gps where gpsID NOT IN ( SELECT * FROM (SELECT MAX(gpsID) FROM gps) AS X)";').read()  	
 	
-if (destinationReached):
-  #delete first record in database
-  print 'delete first record'
+  if (destinationReached and following):
+    #delete first record in database
+    print 'delete first record'
+    os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "DELETE FROM gps where gpsID IN ( SELECT * FROM (SELECT MIN(gpsID) FROM gps) AS X)";').read()  
 
 #delete all records in the database
+os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e "DELETE FROM gps";').read()
