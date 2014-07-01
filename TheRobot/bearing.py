@@ -2,7 +2,9 @@ import os
 import sys
 from math import *
 
-if argv[5]:
+currentBearing = 0.0
+
+if sys.argv[5]:
    currentBearing = float(sys.argv[5])
 
 # bearings
