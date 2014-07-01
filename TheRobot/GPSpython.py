@@ -162,8 +162,11 @@ if __name__ == '__main__':
       playerLong = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT longitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
       playerLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
       
+      #get the distance to the player
       distanceToPlayer = distance(float(cartLat), float(cartLong), float(playerLat), float(playerLong))
       print 'distanceToPlayer = ' , distanceToPlayer
+      
+      #store previous position in order to keep track of bearing
       previousCartLat = cartLat
       previousCartLong = cartLong
     
@@ -204,6 +207,10 @@ if __name__ == '__main__':
             
             #resume moving forward
             os.system('python /home/pi/motor.py f 1 &')
+            
+        #update previous position to current position
+        previousCartLat = cartLat
+        previousCartLong = cartLong
     
         #calculate distance to player
         distanceToPlayer = distance(float(cartLat), float(cartLong), float(playerLat), float(playerLong))
