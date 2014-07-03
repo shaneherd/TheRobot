@@ -25,11 +25,11 @@ dist = float(d)
 sleepTime = dist
 if (sys.argv[2] == '1'):
     if sys.argv[1] == 'r':
-        setSpeed(ser, 0, 1, 100)
-        setSpeed(ser, 1, 0, 100)
+        setSpeed(ser, 0, 1, 0)
+        setSpeed(ser, 1, 0, 75)
     if sys.argv[1] == 'l':
-        setSpeed(ser, 0, 0, 100)
-        setSpeed(ser, 1, 1, 100)
+        setSpeed(ser, 0, 0, 75)
+        setSpeed(ser, 1, 1, 0)
     if sys.argv[1] == 'f':
         setSpeed(ser, 0, 0, 100)
         setSpeed(ser, 1, 0, 100)

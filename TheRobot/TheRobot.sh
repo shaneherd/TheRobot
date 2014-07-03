@@ -4,7 +4,7 @@ mysqlpassword="password"
 #Set  Refresh
 #echo "How long do you want the wait time to be?          "
 #read waitTime
-waitTime="1"
+waitTime="0.16"
 
 #Invoke GPIO
 echo "1" > /sys/class/gpio/export
@@ -16,6 +16,8 @@ echo "5" > /sys/class/gpio/export
 #Start Loop
 while :
 do
+
+START=$(date +%s%N)
 #Read MySQL Data
 #Direction
 direction1="out"
@@ -34,6 +36,8 @@ statusFollow=$(mysql -B --disable-column-names --user=$mysqlusername --password=
 gpsMaxId=$(mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword webservice -e "SELECT max(gpsID) FROM gps ";)
 gpsLong=$(mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword webservice -e "SELECT longitude FROM gps WHERE gpsID='$gpsMaxId'";)
 gpsLat=$(mysql -B --disable-column-names --user=$mysqlusername --password=$mysqlpassword webservice -e "SELECT latitude FROM gps WHERE gpsID='$gpsMaxId'";)
+
+
 
 #Run Commands
 if [ "$direction1" == "out" ]; then
@@ -105,6 +109,15 @@ if [ "$directionFollow" == "out" ]; then
 else
 	echo "in" > /sys/class/gpio/gpio5/direction
 fi
+if [ "$status1" == "0" ] && [ "$status2" == "0" ] && [ "$status3" == "0" ] && [ "$status4" == "0" ] && [ "$statusFollow" == "0" ]; then
+		python /home/pi/motor.py f 0 &
+		echo "turning off"
+fi
+
+END=$(date +%s%N)
+echo "$START"
+echo "$END"
+
 #Complete Loop
-sleep $waitTime
+#sleep $waitTime
 done

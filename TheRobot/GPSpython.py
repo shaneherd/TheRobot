@@ -24,16 +24,16 @@ def getInitialBearing():
     initialBearing = 0.0
     
     #get the initial cart position
-    cartLatInitial = '43.816142300' #gpsd.fix.latitude
-    cartLongInitial = '-111.784585100' #gpsd.fix.longitude
+    cartLatInitial = gpsd.fix.latitude
+    cartLongInitial = gpsd.fix.longitude
     
     os.system('python /home/pi/motor.py f 1 &')
     time.sleep(2.5)  #drive forward for 1 meter
     os.system('python /home/pi/motor.py f 0 &')
     
     #get the carts position
-    cartLat = '43.816142399' #gpsd.fix.latitude
-    cartLong = '-111.784585100' #gpsd.fix.longitude
+    cartLat = gpsd.fix.latitude
+    cartLong = gpsd.fix.longitude
 
     # convert to radians:
     g2r = pi/180
@@ -47,9 +47,6 @@ def getInitialBearing():
 
     # compute bearning and convert back to degrees:
     initialBearing = atan2(y, x) / g2r
-
-    #if initialBearing < 0:
-      #initialBearing = initialBearing + 360
 
     print 'Bearing: ' + str(initialBearing)
     
@@ -71,9 +68,6 @@ def getCurrentBearing(latCurrent, longCurrent, latDest, longDest):
     # compute bearning and convert back to degrees:
     currentBearing = atan2(y, x) / g2r
 
-    #if currentBearing < 0:
-      #currentBearing = currentBearing + 360
-
     print 'Bearing: ' + str(currentBearing)
     
     return currentBearing
@@ -82,19 +76,20 @@ def turnTowardDestination(bearingToTurn):
     degreesToTurn = abs(bearingToTurn)
     if degreesToTurn > 180:
         degreesToTurn = degreesToTurn - 180
-    sleeptime = degreesToTurn/280
+    sleeptime = degreesToTurn/90 #robot turns 90 degrees per second @ speed of 75
+    
     if ((bearingToTurn > 0 and bearingToTurn <= 180) or (bearingToTurn > -360 and bearingToTurn <= -180)):
         #turn right
         print "turn right"
-        os.system('python /home/pi/motor.py r 1 &')
-        time.sleep(sleeptime)
-        os.system('python /home/pi/motor.py r 0 &')
-    elif ((bearingToTurn < 0 and bearingToTurn > -180) or (bearingToTurn > 180 and bearingToTurn < 360)):
-        #turn left
-        print "turn left"
         os.system('python /home/pi/motor.py l 1 &')
         time.sleep(sleeptime)
         os.system('python /home/pi/motor.py l 0 &')
+    elif ((bearingToTurn < 0 and bearingToTurn > -180) or (bearingToTurn > 180 and bearingToTurn < 360)):
+        #turn left
+        print "turn left"
+        os.system('python /home/pi/motor.py r 1 &')
+        time.sleep(sleeptime)
+        os.system('python /home/pi/motor.py r 0 &')
  
 class GpsPoller(threading.Thread):
   def __init__(self):
@@ -140,11 +135,14 @@ if __name__ == '__main__':
       destinationLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMinId) + '\'";').read()
     
       #get the carts position
-      cartLat = '43.816142300' #gpsd.fix.latitude
-      cartLong = '-111.784585100' #gpsd.fix.longitude
+      cartLat = gpsd.fix.latitude
+      cartLong = gpsd.fix.longitude
+      
+      print 'cartLat = ', cartLat
+      print 'cartLong = ', cartLong
     
       #calculate direction to destination
-      bearingToDestination = getBearing(cartLat, cartLong, destinationLat, destinationLong)
+      bearingToDestination = getCurrentBearing(cartLat, cartLong, destinationLat, destinationLong)
 
       #determine how far to turn and in what direction
       bearingToTurn = bearingToDestination - currentBearing
@@ -183,13 +181,13 @@ if __name__ == '__main__':
         playerLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
     
         #get the carts position
-        cartLat = '43.816142300' #gpsd.fix.latitude
-        cartLong = '-111.784585100' #gpsd.fix.longitude
+        cartLat = gpsd.fix.latitude
+        cartLong = gpsd.fix.longitude
         
         #update current bearing to ensure that we are still on course to destination
         if ((previousCartLat != cartLat) and (previousCartLong != cartLong)):
-            currentBearing = getBearing(previousCartLat, previousCartLong, cartLat, cartLong)
-        bearingToDestination = getBearing(cartLat, cartLong, destinationLat, destinationLong)
+            currentBearing = getCurrentBearing(previousCartLat, previousCartLong, cartLat, cartLong)
+        bearingToDestination = getCurrentBearing(cartLat, cartLong, destinationLat, destinationLong)
         bearingToTurn = bearingToDestination - currentBearing
         if (bearingToTurn != 0):
             #correct the direction to be heading straight for goal
@@ -202,8 +200,8 @@ if __name__ == '__main__':
             currentBearing = bearingToDestination
             
             #update cart position
-            cartLat = '43.816142300' #gpsd.fix.latitude
-            cartLong = '-111.784585100' #gpsd.fix.longitude
+            cartLat = gpsd.fix.latitude
+            cartLong = gpsd.fix.longitude
             
             #resume moving forward
             os.system('python /home/pi/motor.py f 1 &')
@@ -241,8 +239,8 @@ if __name__ == '__main__':
           playerLat = os.popen('mysql -B --disable-column-names --user=shane --password=password webservice -e \"SELECT latitude FROM gps WHERE gpsID=\'' + str(gpsMaxId) + '\'";').read()
         
           #get the carts position
-          cartLat = '43.816142300' #gpsd.fix.latitude
-          cartLong = '-111.784585100' #gpsd.fix.longitude
+          cartLat = gpsd.fix.latitude
+          cartLong = gpsd.fix.longitude
         
           #calculate the distance to the player
           distanceToPlayer = distance(float(playerLat), float(playerLong), float(cartLat), float(cartLong))
