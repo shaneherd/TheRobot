@@ -36,3 +36,5 @@ towards the destination, and then starts moving forward. It continually checks t
 its course and whether or not it is within range of the player. If it gets within range of the player, it stops moving and 
 waits until the player has moved away. It then recalculates the direction to the player's new location and repeats the 
 above steps.
+
+The PHP files are used to allow the Androiid App to interact with the MySQL database.
